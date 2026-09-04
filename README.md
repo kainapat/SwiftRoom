@@ -78,9 +78,12 @@ python client.py
 
 ```text
 SwiftRoom/
-├── server.py          # AsyncIO server: rooms, clients, broadcast, timestamps
-├── client.py          # AsyncIO + Rich client: welcome, colors, status
-├── requirements.txt   # rich>=13.0
+├── server.py            # TCP AsyncIO server: rooms, clients, broadcast, timestamps
+├── client.py            # TCP AsyncIO + Rich client: welcome, colors, status
+├── multicast_server.py  # UDP Multicast Logger: join 3 กลุ่ม, log JOIN/LEAVE/CHAT
+├── multicast_client.py  # UDP Multicast + Rich + Thread รับ/ส่ง, heartbeat
+├── CONTEXT.md           # ศัพท์โดเมน (Room, Member, Heartbeat, Logger, Join/Leave/Exit)
+├── requirements.txt     # rich>=13.0
 └── README.md
 ```
 
@@ -108,3 +111,57 @@ SwiftRoom/
 ## 📄 License
 
 MIT — ดูเพิ่มที่ [LICENSE](./LICENSE)
+
+---
+
+# 📡 Multicast Mode | โหมดมัลติแคสต์ (UDP)
+
+> P2P chat over UDP multicast (Class D) + Rich UI + heartbeat presence
+> แชทแบบ P2P ผ่าน UDP multicast + หน้าจอ Rich + heartbeat
+
+## หลักการสั้นๆ | Concepts
+
+- **Unicast** = 1:1, **Broadcast** = 1:ทุกคนในวง, **Multicast** = 1:เฉพาะสมาชิกกลุ่ม (Class D `224.0.0.0`–`239.255.255.255`)
+- Client คุยกันเองตรงๆ ไม่ผ่าน server กลาง | Server เป็นแค่ **Logger** join ทั้ง 3 กลุ่มเพื่อ log ไม่ได้ relay
+- **TTL:** `1`=local (ทดสอบเครื่องเดียว), `<32`=site, `<64`=organization, `<128+`=global
+- **Loopback** `1` = เครื่องส่งได้รับข้อความตัวเองด้วย (จำเป็นตอนเทสเครื่องเดียว)
+
+## ห้อง Multicast | Rooms
+
+| ห้อง | Multicast IP | พอร์ต |
+|---|---|---|
+| room1 | `239.1.1.10` | 5000 |
+| room2 | `239.1.1.20` | 6000 |
+| room3 | `239.1.1.30` | 7000 |
+
+> ใช้ช่วง `239.x` (administratively scoped) แทน `224.0.0.1-3` ที่เป็น reserved ใช้จริงจะพัง
+
+## วิธีรัน Multicast | Run
+
+```powershell
+# หน้าต่างที่ 1 — Logger กลาง:
+python multicast_server.py
+# หน้าต่างที่ 2, 3, ... — Client:
+python multicast_client.py
+```
+
+1. ตั้ง nickname (1-20 ตัว ไม่มีช่องว่าง)
+2. เลือกห้อง 1/2/3
+3. พิมพ์ข้อความส่งได้เลย ลองพิมพ์ไทยได้ (UTF-8)
+4. ทดสอบแยกห้อง: ห้อง 1 คุยกัน ห้อง 2 ต้องไม่เห็น
+
+## คำสั่ง Multicast | Commands
+
+| Command | ความหมาย |
+|---|---|
+| `/list` | ดูสมาชิกในห้อง (จาก heartbeat 5 วิ, timeout 15 วิ) |
+| `/leave` | ออกห้องกลับไปเมนูเลือกห้อง (ส่ง `BYE` + drop membership) |
+| `/exit` | ปิดโปรแกรม |
+| `/help` | แสดงความช่วยเหลือ |
+
+## สถาปัตยกรรม Multicast | Architecture
+
+- **Client:** UDP socket + `IP_ADD_MEMBERSHIP` + `IP_MULTICAST_TTL=1` + `IP_MULTICAST_LOOP=1`, 2 thread (recv + heartbeat) + main thread รับ input
+- **Presence:** `HELLO` ทุก 5 วิ, `BYE` ตอนออก; `Join` = HELLO ครั้งแรกหรือกลับมาหลังหายเกิน timeout (heartbeat ระหว่างนั้นเงียบ ไม่พิมพ์รัว)
+- **Validate:** ตรวจ IP ว่าอยู่ใน Class D จริง และปฏิเสธช่วง reserved `224.0.0.0/24`
+- ศัพท์โดเมนดูที่ [CONTEXT.md](./CONTEXT.md)
