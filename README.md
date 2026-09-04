@@ -105,12 +105,6 @@ SwiftRoom/
 - พิมพ์แชทโดยยังไม่เข้าห้อง → เตือนให้ `/join` ก่อน
 - Client หลุด → ลบออกจากห้อง + broadcast `LEAVE`
 
-## 📝 Spec Summary | สเปกที่ตกลงกัน (Grilling 7 ข้อ)
-
-1. Client-Server ด้วย `asyncio` 2. UI `rich` 3. ชื่อ `SwiftRoom`
-4. แยก `server.py` + `client.py` 5. Timestamp บนจออย่างเดียว
-6. `localhost:8888` 7. Strict error + แจ้งเตือนสีแดง
-
 ## 📄 License
 
 MIT — ดูเพิ่มที่ [LICENSE](./LICENSE)
