@@ -1,58 +1,116 @@
-# ⚡ SwiftRoom Chat — โปรแกรมแชท CLI แบบ Concurrent (Python AsyncIO + Rich)
+# ⚡ SwiftRoom Chat
 
-## สรุปสเปกที่ตกลงกัน (Grilling 7 ข้อ)
-1. **สถาปัตยกรรม:** Client-Server ด้วย `asyncio` (รองรับหลาย terminal พร้อมกันจริง)
-2. **UI:** `rich` — สีเหลือง=ระบบ / ขาว=แชท / เขียว=เข้า / แดง=ออก+error, มี Header + Welcome Screen
-3. **ชื่อโปรแกรม:** SwiftRoom
-4. **ไฟล์:** `server.py` + `client.py` แยกส่วน Client/Server/Room/Message ชัดเจน
-5. **Timestamp:** `YYYY-MM-DD HH:MM:SS` แสดงบนจอทุกเหตุการณ์ (เชื่อมต่อ/เข้า/ออก/ส่งข้อความ)
-6. **Network:** `localhost:8888` ทดสอบบนเครื่องเดียวหลายหน้าต่าง
-7. **Error:** Strict — ชื่อซ้ำ/ห้องไม่มี/คำสั่งผิด จะถูกปฏิเสธพร้อมแจ้งเตือนสีแดง
+> Concurrent CLI Chat with Python AsyncIO + Rich, multi-room support
+> โปรแกรมแชทผ่าน Command Line รองรับหลายห้องพร้อมกัน ด้วย AsyncIO
 
-## วิธีติดตั้ง
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python)](https://www.python.org/)
+[![AsyncIO](https://img.shields.io/badge/Concurrency-AsyncIO-green)](https://docs.python.org/3/library/asyncio.html)
+[![Rich](https://img.shields.io/badge/UI-Rich-cyan)](https://github.com/Textualize/rich)
+[![License](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
+
+## ✨ Features | คุณสมบัติเด่น
+
+| EN | TH |
+|---|---|
+| 💬 Multi-room chat, isolated by room | 💬 หลายห้องแชท แยกข้อความตามห้องชัดเจน |
+| 👤 Custom username with duplicate check | 👤 ตั้งชื่อผู้ใช้เอง มีกันชื่อซ้ำ |
+| ⏱️ Timestamps `YYYY-MM-DD HH:MM:SS` for connect / join / leave / message | ⏱️ เวลามาตรฐานทุกเหตุการณ์ |
+| 🎨 Rich Terminal UI: yellow=system, white=chat, green=join, red=leave/error | 🎨 หน้าจอสวยแยกสีตามประเภท |
+| ⚡ AsyncIO concurrent server, no blocking | ⚡ Server รองรับหลายคนพร้อมกันไม่บล็อก |
+
+## 🎬 Demo | ตัวอย่าง
+
+```text
+⚡ SwiftRoom Chat ⚡  |  👤 alice  |  🏠 room1
+------------------------------------------------------------
+[2026-09-04 15:35:32] alice@room1> สวัสดี room1
+[2026-09-04 15:35:33] bob เข้าร่วมห้อง 'room1' (Join Room Time)
+[2026-09-04 15:35:35] bob: สวัสดีเหมือนกัน!
+[2026-09-04 15:35:40] bob ออกจากห้อง 'room1' (Leave Room Time)
+
+# อีกห้องคุยพร้อมกัน ไม่เห็นข้อความข้ามห้อง
+[alice@room1] hello-room1-only  →  [bob@room2] ไม่เห็นข้อความนี้ ✅
+```
+
+## 🚀 Quick Start | วิธีรัน
+
+**1. Install | ติดตั้ง**
 ```powershell
 cd "$env:USERPROFILE\Desktop\SwiftRoom"
 pip install -r requirements.txt
 ```
 
-## วิธีรัน (ต้องเปิด 2+ หน้าต่าง)
-หน้าต่างที่ 1 — Server:
+**2. Run Server | รันเซิร์ฟเวอร์ (หน้าต่างที่ 1)**
 ```powershell
 python server.py
-# หรือระบุ host/port: python server.py 127.0.0.1 8888
+# หรือ: python server.py 127.0.0.1 8888
 ```
-หน้าต่างที่ 2,3,4... — Client (เปิดกี่ตัวก็ได้):
+
+**3. Run Clients | รันไคลเอนต์ (หน้าต่างที่ 2, 3, ...)**
 ```powershell
 python client.py
 ```
 
-## ลองสถานการณ์ตามโจทย์ (แยกห้องไม่รบกวนกัน)
-1. Client A: `/create room1` แล้วพิมพ์ `สวัสดี room1`
-2. Client B: `/create room2` แล้วพิมพ์ `สวัสดี room2`
-3. ผล: A เห็นเฉพาะ room1, B เห็นเฉพาะ room2 — พิสูจน์ว่าแยกห้องชัดเจน
-4. ลอง `/rooms` ดูจำนวนคน, `/users` ดูรายชื่อ, `/rename ชื่อใหม่`, `/leave`, `/join room1`
+> Open 2+ terminals to test concurrent rooms.
+> เปิดหลาย terminal เพื่อทดสอบหลายห้องพร้อมกัน
 
-## คำสั่งทั้งหมด
-| คำสั่ง | ความหมาย |
-|---|---|
-| `/create <ห้อง>` | สร้างห้องใหม่ + เข้าห้องอัตโนมัติ |
-| `/join <ห้อง>` | เข้าร่วมห้องที่มีอยู่ |
-| `/leave` | ออกจากห้องปัจจุบัน |
-| `/rooms` | ดูห้องทั้งหมด + จำนวนคน |
-| `/users` | ดูรายชื่อคนในห้องปัจจุบัน |
-| `/rename <ชื่อใหม่>` | เปลี่ยนชื่อ (ห้ามซ้ำ) |
-| `/quit` หรือ `/exit` | ออกจากโปรแกรม |
-| `/help` | ช่วยเหลือ |
+## 📚 Commands | คำสั่งทั้งหมด
 
-## สถาปัตยกรรมทางเทคนิค
-- **Server (`server.py`):** `asyncio.start_server` + `dict rooms` + `dict clients` + `asyncio.Lock` กัน race condition, broadcast แยกตามห้อง, ทุกเหตุการณ์ติด timestamp
-- **Client (`client.py`):** `asyncio.open_connection` + 2 task concurrent (`listen_loop` รับข้อความ + `input_loop` รับคีย์บอร์ดผ่าน `run_in_executor` เพราะ `input()` เป็น blocking), แสดงผลด้วย `rich`
-- **Protocol:** ข้อความแบบบรรทัด `TAG|payload` เช่น `CHAT|timestamp|user|msg`, `JOIN|...`, `LEAVE|...`, `SYS|...`, `ERROR|...`, `ROOM|...` ทำให้ client ลงสีย้อนหลังได้ง่าย
-- **ทำไมใช้ AsyncIO ไม่ใช้ Threading:** งานนี้เป็น I/O-bound (รอ network) AsyncIO เบากว่า thread มาก รองรับหลายร้อย connection ใน process เดียวโดยไม่ต้องจัดการ lock ของ thread ให้วุ่นวาย
+| Command | EN | TH |
+|---|---|---|
+| `/create <room>` | Create + auto-join room | สร้างห้องใหม่ + เข้าอัตโนมัติ |
+| `/join <room>` | Join existing room | เข้าร่วมห้องที่มีอยู่ |
+| `/leave` | Leave current room | ออกจากห้องปัจจุบัน |
+| `/rooms` | List rooms + user count | ดูห้องทั้งหมด + จำนวนคน |
+| `/users` | List users in current room | ดูรายชื่อคนในห้อง |
+| `/rename <name>` | Change username | เปลี่ยนชื่อ (ห้ามซ้ำ) |
+| `/quit` or `/exit` | Quit program | ออกจากโปรแกรม |
+| `/help` | Show help | ช่วยเหลือ |
 
-## การจัดการข้อผิดพลาด
+## 🧪 Try This | ลองตามนี้
+
+1. Client A: `/create room1` → พิมพ์ `สวัสดี room1`
+2. Client B: `/create room2` → พิมพ์ `สวัสดี room2`
+3. ผล: A เห็นเฉพาะ room1, B เห็นเฉพาะ room2 — แยกห้องชัดเจน
+4. ลอง `/rooms`, `/users`, `/rename ชื่อใหม่`, `/leave`, `/join room1`
+
+## 🏗️ Project Structure | โครงสร้าง
+
+```text
+SwiftRoom/
+├── server.py          # AsyncIO server: rooms, clients, broadcast, timestamps
+├── client.py          # AsyncIO + Rich client: welcome, colors, status
+├── requirements.txt   # rich>=13.0
+└── README.md
+```
+
+## ⚙️ How It Works | สถาปัตยกรรม
+
+- **Server:** `asyncio.start_server` + `dict rooms` + `dict clients` + `asyncio.Lock` กัน race, broadcast แยกตามห้อง
+- **Client:** 2 concurrent tasks — `listen_loop` รับข้อความ + `input_loop` รับคีย์บอร์ดผ่าน `run_in_executor` (เพราะ `input()` เป็น blocking)
+- **Protocol:** บรรทัด `TAG|payload` เช่น `CHAT|timestamp|user|msg`, `JOIN|...`, `LEAVE|...`, `SYS|...`, `ERROR|...`, `ROOM|...`
+- **Why AsyncIO?** งานนี้เป็น I/O-bound (รอ network) AsyncIO เบากว่า Threading รองรับหลายร้อย connection ใน process เดียว
+
+## 🎨 UI & Timestamps
+
+- Header แสดงชื่อโปรแกรม + `👤 user` + `🏠 room`
+- สี: 💛 เหลือง=ระบบ / ⬜ ขาว=แชท / 💚 เขียว=เข้า / ❤️ แดง=ออก+error
+- Timestamp `YYYY-MM-DD HH:MM:SS` ทุกเหตุการณ์: Connection / Join / Leave / Message
+
+## 🛡️ Error Handling | การจัดการข้อผิดพลาด
+
 - ชื่อซ้ำ → `ERROR` + ให้ตั้งใหม่
 - ห้องไม่มี → แนะนำ `/rooms` หรือ `/create`
 - คำสั่งผิด → แนะนำ `/help`
 - พิมพ์แชทโดยยังไม่เข้าห้อง → เตือนให้ `/join` ก่อน
-- Client หลุด → Server ลบออกจากห้อง + broadcast `LEAVE` ให้ห้องนั้นรู้
+- Client หลุด → ลบออกจากห้อง + broadcast `LEAVE`
+
+## 📝 Spec Summary | สเปกที่ตกลงกัน (Grilling 7 ข้อ)
+
+1. Client-Server ด้วย `asyncio` 2. UI `rich` 3. ชื่อ `SwiftRoom`
+4. แยก `server.py` + `client.py` 5. Timestamp บนจออย่างเดียว
+6. `localhost:8888` 7. Strict error + แจ้งเตือนสีแดง
+
+## 📄 License
+
+MIT — ดูเพิ่มที่ [LICENSE](./LICENSE)
