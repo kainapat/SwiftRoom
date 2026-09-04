@@ -1,12 +1,32 @@
 # ⚡ SwiftRoom Chat
 
-> Concurrent CLI Chat with Python AsyncIO + Rich, multi-room support
-> โปรแกรมแชทผ่าน Command Line รองรับหลายห้องพร้อมกัน ด้วย AsyncIO
+> Two-mode CLI Chat: TCP AsyncIO rooms + UDP Multicast groups — with Rich UI
+> แชท CLI 2 โหมด: ห้อง TCP (AsyncIO) + กลุ่ม Multicast (UDP) — หน้าจอ Rich สวยทั้งคู่
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python)](https://www.python.org/)
-[![AsyncIO](https://img.shields.io/badge/Concurrency-AsyncIO-green)](https://docs.python.org/3/library/asyncio.html)
+[![AsyncIO](https://img.shields.io/badge/TCP-AsyncIO-green)](https://docs.python.org/3/library/asyncio.html)
+[![Multicast](https://img.shields.io/badge/UDP-Multicast-orange)](https://en.wikipedia.org/wiki/Multicast)
 [![Rich](https://img.shields.io/badge/UI-Rich-cyan)](https://github.com/Textualize/rich)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
+
+## 🧭 Choose Mode | เลือกโหมด
+
+| Mode | Run | Best for |
+|---|---|---|
+| 🖥️ **TCP rooms** ([go](#tcp-mode)) | `python server.py` + `python client.py` | หลายห้องบน server กลาง, มี `/create /join /rooms` |
+| 📡 **Multicast groups** ([go](#multicast-mode)) | `python multicast_server.py` + `python multicast_client.py` | P2P ผ่าน Class D `239.x`, heartbeat presence |
+
+## 📑 Contents | สารบัญ
+
+- [TCP Mode](#tcp-mode) — Features, Demo, Quick Start, Commands
+- [Project Structure](#project-structure) — How It Works, UI, Errors
+- [Multicast Mode](#multicast-mode) — Concepts, Rooms, Run, Commands
+- [License](#license)
+
+---
+
+<a id="tcp-mode"></a>
+# 🖥️ TCP Mode | โหมด TCP
 
 ## ✨ Features | คุณสมบัติเด่น
 
@@ -74,6 +94,7 @@ python client.py
 3. ผล: A เห็นเฉพาะ room1, B เห็นเฉพาะ room2 — แยกห้องชัดเจน
 4. ลอง `/rooms`, `/users`, `/rename ชื่อใหม่`, `/leave`, `/join room1`
 
+<a id="project-structure"></a>
 ## 🏗️ Project Structure | โครงสร้าง
 
 ```text
@@ -108,12 +129,14 @@ SwiftRoom/
 - พิมพ์แชทโดยยังไม่เข้าห้อง → เตือนให้ `/join` ก่อน
 - Client หลุด → ลบออกจากห้อง + broadcast `LEAVE`
 
+<a id="license"></a>
 ## 📄 License
 
 MIT — ดูเพิ่มที่ [LICENSE](./LICENSE)
 
 ---
 
+<a id="multicast-mode"></a>
 # 📡 Multicast Mode | โหมดมัลติแคสต์ (UDP)
 
 > P2P chat over UDP multicast (Class D) + Rich UI + heartbeat presence
